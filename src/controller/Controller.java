@@ -14,20 +14,31 @@ public class Controller {
 
     public Response<CommandSale.out> deductUserMoney(CommandSale.in saleRequestInfo) {
         User user = userRepository.findById(saleRequestInfo.getUserId());
-
-        int productPrice = saleRequestInfo.getPrice();
-        int userMoney = user.getMoney();
-        int deductedMoney = productPrice;
-
-        if (user.getGrade() == Grade.A) {
-            deductedMoney -= 500;
-        }
-        user.setMoney(userMoney - deductedMoney);
+        int deductedMoney = getDeductedMoney(saleRequestInfo, user);
         bank.deposit(deductedMoney / 10);
 
         CommandSale.out responseData = new CommandSale.out(user.getUserId(), user.getMoney());
 
         return Response.Ok(responseData);
+    }
+
+    public int ALogic(CommandSale.in saleRequestInfo) {
+        User user = userRepository.findById(saleRequestInfo.getUserId());
+        int deductedMoney = getDeductedMoney(saleRequestInfo, user);
+
+        return deductedMoney;
+    }
+
+    private int getDeductedMoney(CommandSale.in saleRequestInfo, User user) {
+        int productPrice = saleRequestInfo.getPrice();
+        int deductedMoney = productPrice;
+
+        if (user.getGrade() == Grade.A) {
+            deductedMoney -= 500;
+        }
+
+        user.setMoney(user.getMoney() - deductedMoney);
+        return deductedMoney;
     }
 
 }
